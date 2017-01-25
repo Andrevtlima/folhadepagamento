@@ -289,8 +289,11 @@ public class ProjetoP3 {
     public static void main(String[] args) {
         int id =0;
         int size = 0;
+        int size_back = 0;
         int size_Cartoes = 0;
         int id_taxas = 0;
+        boolean undo_redo = true;
+        String undo_redo_type = null;
         TaxaServico[] taxaServicos = new TaxaServico[50];
         Scanner entrada = new Scanner (System.in);
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -302,6 +305,9 @@ public class ProjetoP3 {
        
         Empregado[] empregados;
         empregados = new Empregado[50];
+        Empregado[] empregados_back;
+        int id_back = 0;
+        empregados_back = new Empregado[50];
         CartaoPonto[] cartoes = new CartaoPonto[50];
         Venda[] vendas = new Venda[50];
          
@@ -314,7 +320,9 @@ public class ProjetoP3 {
             entrada.nextLine();
             switch(escolha){
                 case 1:
-                    
+                    empregados_back = empregados;
+                    id_back = id;
+                    size_back = size;
                     System.out.println("Digite o nome do funcionario:");
                     String name = entrada.nextLine();
                     System.out.println("Digite o end do funcionario:");
@@ -344,16 +352,24 @@ public class ProjetoP3 {
                         System.out.println(empregados[0].id);
                         id++;
                         size++;
-                    }                    
+                    } 
+                    undo_redo_type = "Empregados";
                     break;
                 case 2:
+                	empregados_back = empregados;
+                    id_back = id;
+                    size_back = size;
                     System.out.println("Digite o id do funcionario que você deseja remover:");
                     int id_remove = entrada.nextInt();
                     empregados = remove_emp(empregados, id_remove,size);
                     System.out.println("Empregado removido com sucesso");
                     size--;
+                    undo_redo_type = "Empregados";
                     break;
                 case 3:
+                	empregados_back = empregados;
+                    id_back = id;
+                    size_back = size;
                     System.out.println("Digite o id do funcionario que você deseja registrar o cartao de ponto:");
                     int id_empcartaoPonto = entrada.nextInt();
                     entrada.nextLine();
@@ -376,6 +392,7 @@ public class ProjetoP3 {
                     }
                     cartoes[size_Cartoes] = lancarPonto(id_empcartaoPonto, timeIn, timeOut, date);
                     size_Cartoes++;
+                    undo_redo_type = "Cartoes";
                     break;
                 case 4:
                     System.out.println("Digite o id do funcionario que você deseja registrar a venda:");
@@ -383,6 +400,7 @@ public class ProjetoP3 {
                     System.out.println("Digite o valor da venda:");
                     double valor = entrada.nextDouble();
                     lancarVenda(id_empVenda, date, valor);
+                    undo_redo_type = "Venda";
                     break;
                 case 5:
                     System.out.println("Digite o id do funcionario que você deseja registrar a taxa de serviço:");
@@ -391,9 +409,14 @@ public class ProjetoP3 {
                     double valorTax = entrada.nextDouble();                    
                     taxaServicos[id_taxas] = lancarTaxa(id_empTaxa, valorTax,date);
                     id_taxas++;
+                    undo_redo_type = "Taxas";
                     break;
                 case 6:
+                	empregados_back = empregados;
+                    id_back = id;
+                    size_back = size;
                     empregados = alterEmp(empregados,size);
+                    undo_redo_type = "Empregados";
                     break;
                 case 7:
                     pagamento(date, empregados, cartoes,size,size_Cartoes,taxaServicos,id_taxas);
@@ -403,8 +426,25 @@ public class ProjetoP3 {
                     date = c.getTime();
                     break;
                 case 8:
+                	
+                		if(undo_redo_type.equals("Empregados")){
+                			Empregado[] emp_aux = empregados;
+                			int id_aux = id;
+                			int size_aux = size;
+                			empregados = empregados_back;
+                			id = id_back;
+                			size = size_back;
+                			empregados_back = emp_aux;
+                			id_back = id_aux;
+                			size_back = size_aux;
+                			
+                		}
+                	
                     break;
                 case 9:
+                	for(int i = 0; i < size ; i++){
+                		System.out.println("["+empregados[i].id+"] Empregado "+empregados[i].name+" Tipo "+empregados[i].type+"");
+                	}
                     break;
                 case 10:
                     break;
