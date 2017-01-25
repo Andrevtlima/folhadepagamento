@@ -3,10 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package projeto.p3;
+package p3;
 
-import static com.sun.org.apache.xalan.internal.lib.ExsltDatetime.date;
-import static java.lang.System.in;
 import java.util.Date;
 import java.sql.Time;
 import java.text.DateFormat;
@@ -75,6 +73,7 @@ public class ProjetoP3 {
         new_Cartao.id_emp = id;
         new_Cartao.hora_chegada = hr_chegada;
         new_Cartao.hora_saida = hr_saida;
+        new_Cartao.date = date;
         return new_Cartao;
     }
     
@@ -85,14 +84,15 @@ public class ProjetoP3 {
         new_venda.valor_venda = valor;
         return new_venda;
     }
-    public static TaxaServiço lancarTaxa(int id_emp, double taxa){
-        TaxaServiço newTaxa = new TaxaServiço();
+    public static TaxaServico lancarTaxa(int id_emp, double taxa, Date date){
+        TaxaServico newTaxa = new TaxaServico();
         newTaxa.id_emp = id_emp;
         newTaxa.taxa = taxa;
+        newTaxa.date = date;
         return newTaxa;
     }
     
-    @SuppressWarnings("empty-statement")
+    
     public static Empregado[] alterEmp(Empregado empregados[], int size){
         Scanner entrada = new Scanner (System.in);
         System.out.println("Digite o id do empregado que você deseja alterar");
@@ -144,9 +144,10 @@ public class ProjetoP3 {
     /* Horistas Eles são pagos toda sexta feira*/
     /*Assalariados Eles são pagos mensalmente*/
     /*Comissionados Quizenalmente*/
-    public static  void pagamento(Date date,Empregado[] empregados, CartaoPonto[] cartoesPonto, int size, int size_Cartoes){
+    public static  void pagamento(Date date,Empregado[] empregados, CartaoPonto[] cartoesPonto, int size, int size_Cartoes,TaxaServico[] taxa_ser, int size_taxa_ser){
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         boolean friday;
         
         
@@ -160,23 +161,20 @@ public class ProjetoP3 {
         
         /*Pagamento Horistas*/
         for(int i =0; i<size;i++){
-            System.out.println(empregados[i].agenda);
-            
-            
-            
             
             if(empregados[i].agenda.equals("semanalmente")){
                
                 if(friday){
                         double pagamento =0;
-                        for(int j = -4;i<=0;i++){
-                        cal.add(Calendar.DAY_OF_MONTH, j);
-                        for(int k = 0; k< size_Cartoes;k++){
-                            System.out.println(cartoesPonto[k].id_emp);
-                            if(cartoesPonto[k].id_emp == empregados[i].id){
-                                System.out.println(cartoesPonto[k].date.getTime());
-                                System.out.println(cal.getTime());
-                                if(cal.getTime().equals(cartoesPonto[k].date.getTime())){
+                        cal.add(Calendar.DAY_OF_MONTH, -4);                        
+                        for(int l = 1;l<=5;l++){
+                        System.out.println("J = "+ l);
+                        
+                        for(int k = 0; k< size_Cartoes;k++){                                                      
+                            if(cartoesPonto[k].id_emp == empregados[i].id){                            	
+                                String new_date = dateFormat.format(cartoesPonto[k].date);
+                                String other_date = dateFormat.format(cal.getTime());
+                                if(other_date.equals(new_date)){
                                     long diff;
                                     diff = cartoesPonto[k].hora_saida.getTime() - cartoesPonto[k].hora_chegada.getTime();
                                     long hours = TimeUnit.MILLISECONDS.toHours(diff);
@@ -185,12 +183,87 @@ public class ProjetoP3 {
                                         pagamento+= 8*empregados[i].sal_hor;
                                         pagamento+= temp *empregados[i].sal_hor*1.5;
                                     }
+                                    else{
+                                    	pagamento+= hours*empregados[i].sal_hor;
+                                    }
                                 }
                             }
+                            
                         }
+                        cal.add(Calendar.DAY_OF_MONTH, 1); 
                         }
-                        System.out.println(pagamento) ;
+                        if(empregados[i].sindicato){
+                        	System.out.println("Foi deduzido "+empregados[i].taxa_sindicato+"reais da taxad do sindicado");
+                        	pagamento = pagamento - empregados[i].taxa_sindicato;
+                        }
+                        System.out.println("O empregado"+ empregados[i].name+"recebeu o pagamento de"+pagamento+"pelas horas trabalhadas");
                 }
+            }
+            else if(empregados[i].agenda.equals("mensalmente") ){
+            	if(empregados[i].type.equals("Assalariado")){
+            	if(cal.getActualMaximum(Calendar.DAY_OF_MONTH) == cal.get(Calendar.DAY_OF_MONTH)){
+            		System.out.println("O empregado"+ empregados[i].name+"recebeu o pagamento de"+empregados[i].sal_mes+"pelo seu salario mensal");
+            		if(empregados[i].comissao != 0){
+            			double pagamento = 0;
+            			  for(int k = 0; k< size_taxa_ser;k++){
+            				  if(taxa_ser[k].id_emp == empregados[i].id){                            	
+                                  String new_date = dateFormat.format(taxa_ser[k].date);
+                                  String other_date = dateFormat.format(cal.getTime());
+                                  if(other_date.equals(new_date)){
+                                      pagamento+= taxa_ser[k].taxa;
+                                  }
+                              }
+            				  
+            			  }
+            			System.out.println("E teve o acrescimo de "+pagamento+"pelas taxas de serviço");	  
+            			if(empregados[i].sindicato){
+                        	System.out.println("Foi deduzido "+empregados[i].taxa_sindicato+"reais da taxad do sindicado");
+                        	
+                        }
+            		}
+            	}
+            	}
+            }
+            else if(empregados[i].agenda.equals("bi-semanalmente")){
+            	if(empregados[i].type.equals("Assalariado")){
+            		int first_day = cal.getActualMinimum(Calendar.DAY_OF_MONTH);
+            		cal.set(Calendar.DAY_OF_MONTH, first_day);
+            		int day_week = cal.get(Calendar.DAY_OF_WEEK);
+            		int days = Calendar.FRIDAY - day_week;
+            		if(days >0){
+            			cal.add(Calendar.DAY_OF_MONTH, days);
+            			cal.add(Calendar.DAY_OF_MONTH, 7);
+            		}
+            		else{
+            			cal.add(Calendar.DAY_OF_MONTH, days);
+            			cal.add(Calendar.DAY_OF_MONTH, 7);
+            			cal.add(Calendar.DAY_OF_MONTH, 7);
+            		}
+            		Calendar cal2 = Calendar.getInstance();
+            		cal2.setTime(date);
+            		if(cal2.get(Calendar.DAY_OF_MONTH) == cal.get(Calendar.DAY_OF_MONTH)){
+            			System.out.println("O empregado "+ empregados[i].name+" recebeu o pagamento de "+empregados[i].sal_mes+" reais pelo seu salario mensal");
+                		if(empregados[i].comissao != 0){
+                			double pagamento = 0;
+                			  for(int k = 0; k< size_taxa_ser;k++){
+                				  if(taxa_ser[k].id_emp == empregados[i].id){                            	
+                                      String new_date = dateFormat.format(taxa_ser[k].date);
+                                      String other_date = dateFormat.format(cal.getTime());
+                                      if(other_date.equals(new_date)){
+                                          pagamento+= taxa_ser[k].taxa;
+                                      }
+                                  }
+                				  
+                			  }
+                			System.out.println("E teve o acrescimo de "+pagamento+" reais pelas taxas de serviço");	  
+                			if(empregados[i].sindicato){
+                            	System.out.println("Foi deduzido "+empregados[i].taxa_sindicato+" reais da taxad do sindicado");
+                            	
+                            }
+                		}
+            		}
+            		
+            	}
             }
         }
     }
@@ -205,10 +278,9 @@ public class ProjetoP3 {
             System.out.println("5 - Lançar uma taxa de serviço");
             System.out.println("6 - Alterar detalhes de um empregado");
             System.out.println("7 - Rodar a folha de pagamento para hoje");
-            System.out.println("8 - Agendar pagamento");
-            System.out.println("9 - Undo/Redo");
-            System.out.println("10 - Mostrar empregado");
-            System.out.println("11 - Criar nova agenda de pagamento");
+            System.out.println("8 - Undo/Redo");
+            System.out.println("9 - Mostrar empregados");
+            System.out.println("10 - Criar nova agenda de pagamento");
             System.out.println("0 - Sair");
             
             return entrada.nextInt();
@@ -218,6 +290,8 @@ public class ProjetoP3 {
         int id =0;
         int size = 0;
         int size_Cartoes = 0;
+        int id_taxas = 0;
+        TaxaServico[] taxaServicos = new TaxaServico[50];
         Scanner entrada = new Scanner (System.in);
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         DateFormat timeFormat = new SimpleDateFormat("hh:mm");
@@ -249,9 +323,9 @@ public class ProjetoP3 {
                     String type = entrada.nextLine();
                     if(type.equals("Assalariado")){
                         System.out.println("Digite o salario do funcionario:");
-                        Double sal_mes = entrada.nextDouble();
+                        double sal_mes = entrada.nextDouble();
                         System.out.println("Digite o comissao do funcionario:");
-                        Double comissao = entrada.nextDouble();
+                        double comissao = entrada.nextDouble();
                         String agenda = null;
                         if(comissao != 0 ){
                             agenda = "bi-semanalmente";
@@ -265,7 +339,7 @@ public class ProjetoP3 {
                     }
                     else{
                         System.out.println("Digite o valor da hora do funcionario:");
-                        Double sal_hor = entrada.nextDouble();
+                        double sal_hor = entrada.nextDouble();
                         empregados[id] = create_emp_horistas(name, end, type, sal_hor, id+1);
                         System.out.println(empregados[0].id);
                         id++;
@@ -300,7 +374,7 @@ public class ProjetoP3 {
                     } catch (ParseException ex) {
                         Logger.getLogger(ProjetoP3.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    cartoes[id_cartao] = lancarPonto(id_empcartaoPonto, timeIn, timeOut, date);
+                    cartoes[size_Cartoes] = lancarPonto(id_empcartaoPonto, timeIn, timeOut, date);
                     size_Cartoes++;
                     break;
                 case 4:
@@ -315,13 +389,14 @@ public class ProjetoP3 {
                     int id_empTaxa = entrada.nextInt();
                     System.out.println("Digite o valor da taxa:");
                     double valorTax = entrada.nextDouble();                    
-                    lancarTaxa(id_empTaxa, valorTax);
+                    taxaServicos[id_taxas] = lancarTaxa(id_empTaxa, valorTax,date);
+                    id_taxas++;
                     break;
                 case 6:
                     empregados = alterEmp(empregados,size);
                     break;
                 case 7:
-                    pagamento(date, empregados, cartoes,size,size_Cartoes);
+                    pagamento(date, empregados, cartoes,size,size_Cartoes,taxaServicos,id_taxas);
                     Calendar c = Calendar.getInstance(); 
                     c.setTime(date); 
                     c.add(Calendar.DATE, 1);
@@ -332,16 +407,6 @@ public class ProjetoP3 {
                 case 9:
                     break;
                 case 10:
-                    break;
-                case 11:
-                    break;
-                case 12:
-                    break;
-                case 13:
-                    break;
-                case 14:
-                    break;
-                case 15:
                     break;
                 default:
                     break;

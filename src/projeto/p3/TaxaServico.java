@@ -11,9 +11,8 @@ import java.util.Date;
  *
  * @author Casa
  */
-public class Venda {
-    int id_emp;
-    Date data;
-    double valor_venda;
-    
+public class TaxaServico {
+    public double taxa;
+    public int id_emp;
+    public Date date;
 }
