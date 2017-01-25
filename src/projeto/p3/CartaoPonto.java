@@ -6,6 +6,7 @@
 package projeto.p3;
 
 import java.sql.Time;
+import java.util.Date;
 
 /**
  *
@@ -13,7 +14,7 @@ import java.sql.Time;
  */
 public class CartaoPonto {
   public int id_emp;
-  public Time hora_chegada;
-  public Time hora_saida;
-  
+  public Date hora_chegada;
+  public Date hora_saida;
+  public Date date;
 }

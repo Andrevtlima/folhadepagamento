@@ -15,6 +15,7 @@ public class Empregado {
     public String type;
     public int id;
     public String metodo;
+    public String agenda;
     public boolean sindicato;
     public double taxa_sindicato;
     public double sal_hor,sal_mes,comissao;
