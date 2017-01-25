@@ -5,7 +5,7 @@
  */
 package projeto.p3;
 
-import java.sql.Date;
+import java.util.Date;
 
 /**
  *

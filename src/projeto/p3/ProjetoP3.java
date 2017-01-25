@@ -5,8 +5,10 @@
  */
 package projeto.p3;
 
-import java.sql.Date;
+import static com.sun.org.apache.xalan.internal.lib.ExsltDatetime.date;
+import java.util.Date;
 import java.sql.Time;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -18,8 +20,8 @@ import java.util.Scanner;
  */
 public class ProjetoP3 {
 
-    public int id =0;
-    public Empregado create_emp_horistas(String name, String End,String type,double sal_hor){
+    
+    public static Empregado create_emp_horistas(String name, String End,String type,double sal_hor,int id){
         Empregado new_emp = new Empregado();
         try {
             new_emp.name = name;
@@ -27,7 +29,6 @@ public class ProjetoP3 {
             new_emp.sal_hor = sal_hor;
             new_emp.type = type;
             new_emp.id = id;
-            id++;
             return new_emp;
         } catch (Exception e) {
             System.out.println(e);
@@ -35,7 +36,7 @@ public class ProjetoP3 {
         }
         
     }
-    public Empregado create_emp_assalariado(String name, String End,String type,double sal_mes, double comissao){
+    public static Empregado create_emp_assalariado(String name, String End,String type,double sal_mes, double comissao, int id){
         Empregado new_emp = new Empregado();
         try {
             new_emp.name = name;
@@ -44,7 +45,6 @@ public class ProjetoP3 {
             new_emp.comissao = comissao;
             new_emp.type = type;
             new_emp.id = id;
-            id++;
             return new_emp;
         } catch (Exception e) {
             System.out.println(e);
@@ -142,7 +142,7 @@ public class ProjetoP3 {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         boolean friday;
-        GregorianCalendar calendar = new GregorianCalendar();
+        
         
         if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY){
             friday = true;
@@ -167,8 +167,118 @@ public class ProjetoP3 {
         }
     }
     
+    public static int menu(Scanner entrada, Date date){
+            
+            System.out.println("------------ MENU ------------ ");
+            System.out.println("1 - Adicionar empregado");
+            System.out.println("2 - Remover empregado");
+            System.out.println("3 - Lançar um cartão de ponto");
+            System.out.println("4 - Venda");
+            System.out.println("5 - Lançar uma taxa de serviço");
+            System.out.println("6 - Alterar detalhes de um empregado");
+            System.out.println("7 - Rodar a folha de pagamento para hoje");
+            System.out.println("8 - Agendar pagamento");
+            System.out.println("9 - Undo/Redo");
+            System.out.println("10 - Mostrar empregado");
+            System.out.println("11 - Criar nova agenda de pagamento");
+            System.out.println("0 - Sair");
+            
+            return entrada.nextInt();
+    }
+    
     public static void main(String[] args) {
+        int id =0;
+        Scanner entrada = new Scanner (System.in);
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        Date date;
+        date = new Date();
+//        Calendar c = Calendar.getInstance(); 
+//        c.setTime(date); 
+//        c.add(Calendar.DATE, 1);
+//        date = c.getTime();
+        
+        @SuppressWarnings("MismatchedReadAndWriteOfArray")
         Empregado[] empregados = new Empregado[50];
+        
+        int escolha;
+        System.out.println("Hoje é dia "+ dateFormat.format(date));
+        escolha=menu(entrada,date);
+        while (escolha != 0) {
+            switch(escolha){
+                case 1:
+                    entrada.nextLine();
+                    System.out.println("Digite o nome do funcionario:");
+                    String name = entrada.nextLine();
+                    System.out.println("Digite o end do funcionario:");
+                    String end = entrada.nextLine();
+                    System.out.println("Digite o type do funcionario:");
+                    String type = entrada.nextLine();
+                    if(type.equals("Assalariado")){
+                        System.out.println("Digite o salario do funcionario:");
+                        Double sal_mes = entrada.nextDouble();
+                        System.out.println("Digite o comissao do funcionario:");
+                        Double comissao = entrada.nextDouble();
+                        empregados[id] = create_emp_assalariado(name, end, type, sal_mes, comissao, id+1);
+                        System.out.println(empregados[0].id);
+                        id++;
+                    }
+                    else{
+                        System.out.println("Digite o valor da hora do funcionario:");
+                        Double sal_hor = entrada.nextDouble();
+                        empregados[id] = create_emp_horistas(name, end, type, sal_hor, id);
+                        System.out.println(empregados[0].id);
+                        id++;
+                    }
+                       
+                    
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    break;
+                case 5:
+                    break;
+                case 6:
+                    break;
+                case 7:
+                    break;
+                case 8:
+                    break;
+                case 9:
+                    break;
+                case 10:
+                    break;
+                case 11:
+                    break;
+                case 12:
+                    break;
+                case 13:
+                    break;
+                case 14:
+                    break;
+                case 15:
+                    break;
+                default:
+                    break;
+            }
+            
+            System.out.println("Hoje é dia "+ dateFormat.format(date));
+            escolha=menu(entrada,date);
+        
+                    
+        }
+                
+       
+        
+        
+        
+        
+        
+        
+        
+       
         
         
         
