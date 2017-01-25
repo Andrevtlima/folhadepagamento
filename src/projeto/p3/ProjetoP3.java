@@ -447,6 +447,17 @@ public class ProjetoP3 {
                 	}
                     break;
                 case 10:
+                	System.out.println("Digite o id do empregado que você deseja alterar:");
+                	int id_emp_alter = entrada.nextInt();
+                	entrada.nextLine();
+                	System.out.println("Digite a nova agenda de pagamento (mensalmente, bi-semanalmente, semanalmente:");
+                	String agendaPagamento = entrada.nextLine();
+                	for(int k = 0; k< size; k++){
+                		if(empregados[k].id == id_emp_alter){
+                			empregados[k].agenda = agendaPagamento;
+                		}
+                	}
+                	System.out.println("Operação realziado com sucesso");
                     break;
                 default:
                     break;
