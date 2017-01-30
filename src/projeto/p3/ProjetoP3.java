@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package p3;
+package projeto.p3;
 
 import java.util.Date;
 import java.sql.Time;
@@ -33,6 +33,7 @@ public class ProjetoP3 {
             new_emp.type = type;
             new_emp.id = id;
             new_emp.agenda = "semanalmente";
+            new_emp.dayOfPagamento = 6;
             return new_emp;
         } catch (Exception e) {
             System.out.println(e);
@@ -50,6 +51,7 @@ public class ProjetoP3 {
             new_emp.type = type;
             new_emp.agenda = agenda;
             new_emp.id = id;
+            new_emp.dayOfPagamento = 0;
             return new_emp;
         } catch (Exception e) {
             System.out.println(e);
@@ -104,7 +106,8 @@ public class ProjetoP3 {
             }
         }
         System.out.println("Digite o número da alteração que você deseja realizar no empregado:\n1---Nome\n2----Endereço\n3----Tipo\n4----Método de Pagamento\n5----Participação no sindicato\n6----Taxa sindical");
-        int escolha = entrada.nextInt();;
+        int escolha = entrada.nextInt();
+        entrada.nextLine();
         switch(escolha){
             case 1:
                 System.out.println("Digite o novo nome:");
@@ -128,7 +131,9 @@ public class ProjetoP3 {
                 break;
             case 5:
                 System.out.println("Digite 1 se o empregado pertence ao sindicato e 0 se não pertence:");
-                boolean sindicato = entrada.nextBoolean();
+
+                boolean sindicato;
+                sindicato = (entrada.nextInt()!= 0);
                 empregadoAux.sindicato = sindicato;
                 break;
             case 6:
@@ -139,7 +144,7 @@ public class ProjetoP3 {
             default:
                 break;
         }
-        return null;
+        return empregados;
     }
     /* Horistas Eles são pagos toda sexta feira*/
     /*Assalariados Eles são pagos mensalmente*/
@@ -148,14 +153,10 @@ public class ProjetoP3 {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        boolean friday;
+        boolean dayOfpagamento;
         
         
-        if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY){
-            friday = true;
-        }
-        else
-            friday = false;
+        
         
        
         
@@ -163,8 +164,9 @@ public class ProjetoP3 {
         for(int i =0; i<size;i++){
             
             if(empregados[i].agenda.equals("semanalmente")){
-               
-                if(friday){
+                dayOfpagamento = cal.get(Calendar.DAY_OF_WEEK) == empregados[i].dayOfPagamento;
+                System.out.println(dayOfpagamento);
+                if(dayOfpagamento){
                         double pagamento =0;
                         cal.add(Calendar.DAY_OF_MONTH, -4);                        
                         for(int l = 1;l<=5;l++){
@@ -196,32 +198,33 @@ public class ProjetoP3 {
                         	System.out.println("Foi deduzido "+empregados[i].taxa_sindicato+"reais da taxad do sindicado");
                         	pagamento = pagamento - empregados[i].taxa_sindicato;
                         }
-                        System.out.println("O empregado"+ empregados[i].name+"recebeu o pagamento de"+pagamento+"pelas horas trabalhadas");
+                        System.out.println("O empregado "+ empregados[i].name+" recebeu o pagamento de "+pagamento+" reais pelas horas trabalhadas");
                 }
             }
             else if(empregados[i].agenda.equals("mensalmente") ){
             	if(empregados[i].type.equals("Assalariado")){
-            	if(cal.getActualMaximum(Calendar.DAY_OF_MONTH) == cal.get(Calendar.DAY_OF_MONTH)){
-            		System.out.println("O empregado"+ empregados[i].name+"recebeu o pagamento de"+empregados[i].sal_mes+"pelo seu salario mensal");
-            		if(empregados[i].comissao != 0){
-            			double pagamento = 0;
-            			  for(int k = 0; k< size_taxa_ser;k++){
-            				  if(taxa_ser[k].id_emp == empregados[i].id){                            	
-                                  String new_date = dateFormat.format(taxa_ser[k].date);
-                                  String other_date = dateFormat.format(cal.getTime());
-                                  if(other_date.equals(new_date)){
-                                      pagamento+= taxa_ser[k].taxa;
-                                  }
-                              }
-            				  
-            			  }
-            			System.out.println("E teve o acrescimo de "+pagamento+"pelas taxas de serviço");	  
-            			if(empregados[i].sindicato){
-                        	System.out.println("Foi deduzido "+empregados[i].taxa_sindicato+"reais da taxad do sindicado");
-                        	
+            	if((cal.getActualMaximum(Calendar.DAY_OF_MONTH) == cal.get(Calendar.DAY_OF_MONTH) && empregados[i].dayOfPagamento != 0) || empregados[i].dayOfPagamento ==  cal.get(Calendar.DAY_OF_MONTH)){
+                    System.out.println("O empregado "+ empregados[i].name+" recebeu o pagamento de "+empregados[i].sal_mes+" pelo seu salario mensal");
+                    if(empregados[i].comissao != 0){
+                        double pagamento = 0;
+                        for(int k = 0; k< size_taxa_ser;k++){
+                            if(taxa_ser[k].id_emp == empregados[i].id){
+                                String new_date = dateFormat.format(taxa_ser[k].date);
+                                String other_date = dateFormat.format(cal.getTime());
+                                if(other_date.equals(new_date)){
+                                    pagamento+= taxa_ser[k].taxa;
+                                }
+                            }
+                            
                         }
-            		}
-            	}
+                        System.out.println("E teve o acrescimo de "+pagamento+" pelas taxas de serviço");
+                        if(empregados[i].sindicato){
+                            System.out.println("Foi deduzido "+empregados[i].taxa_sindicato+" reais da taxad do sindicado");
+                        } else {
+                        }
+                    }
+                } else {
+                }
             	}
             }
             else if(empregados[i].agenda.equals("bi-semanalmente")){
@@ -287,6 +290,7 @@ public class ProjetoP3 {
     }
     
     public static void main(String[] args) {
+        
         int id =0;
         int size = 0;
         int size_back = 0;
@@ -447,17 +451,30 @@ public class ProjetoP3 {
                 	}
                     break;
                 case 10:
-                	System.out.println("Digite o id do empregado que você deseja alterar:");
-                	int id_emp_alter = entrada.nextInt();
-                	entrada.nextLine();
-                	System.out.println("Digite a nova agenda de pagamento (mensalmente, bi-semanalmente, semanalmente:");
-                	String agendaPagamento = entrada.nextLine();
-                	for(int k = 0; k< size; k++){
-                		if(empregados[k].id == id_emp_alter){
-                			empregados[k].agenda = agendaPagamento;
-                		}
-                	}
-                	System.out.println("Operação realziado com sucesso");
+                    System.out.println("Criar nova agenda:");
+                    System.out.println("Digite se ela é do tipo mensalmente ou semanalmente:");
+                    String typeOfAgenda = entrada.nextLine();
+                       int PayDay = 0;
+                    if(typeOfAgenda.equals("mensalmente")){
+                        System.out.println("Digite o dia de pagamento na nova agenda:");
+                        PayDay = entrada.nextInt();
+                        entrada.nextLine();
+                    }
+                    else{
+                        System.out.println("Digite o dia da semana para o pagamento na nova agenda:(1 - domingo, 2 - segunda, ..., 7 - sabado");
+                        PayDay = entrada.nextInt();
+                        entrada.nextLine();
+                    }
+                    System.out.println("Digite o id do funcionario que você deseja associar a nova agenda:");
+                    int id_emp2 = entrada.nextInt();
+                    for(int i =0; i<size;i++){
+                        if(empregados[i].id == id_emp2){                         
+                            empregados[i].dayOfPagamento = PayDay;
+                            empregados[i].agenda = typeOfAgenda;
+                            System.out.println("Alteração realizado com sucesso");
+                            break;
+                        }
+                    }
                     break;
                 default:
                     break;

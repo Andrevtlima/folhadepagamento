@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package p3;
+package projeto.p3;
 
 /**
  *
@@ -19,5 +19,6 @@ public class Empregado {
     public boolean sindicato;
     public double taxa_sindicato;
     public double sal_hor,sal_mes,comissao;
+    int dayOfPagamento;
     
 }
